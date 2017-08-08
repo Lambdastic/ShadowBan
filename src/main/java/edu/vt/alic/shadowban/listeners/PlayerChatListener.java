@@ -1,6 +1,7 @@
 package edu.vt.alic.shadowban.listeners;
 
 import edu.vt.alic.shadowban.ShadowBan;
+import edu.vt.alic.shadowban.Util;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -10,31 +11,31 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 import java.util.List;
 
-/**
- * Created by Ali-PC on 7/9/2017.
- */
 public class PlayerChatListener implements Listener {
 
-    public PlayerChatListener() {
-        ShadowBan.getInstance().getServer().getPluginManager().registerEvents(this, ShadowBan.getInstance());
+    private ShadowBan plugin;
+
+    public PlayerChatListener(ShadowBan plugin) {
+        this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerChat(AsyncPlayerChatEvent e) {
-        Player p = e.getPlayer();
+        Player offender = e.getPlayer();
 
-        if (ShadowBan.getInstance().getBannedConfig().getConfigurationSection("Shadow Banned").getKeys(false).contains(p.getUniqueId().toString())) {
+        if (plugin.getBannedConfig().getConfigurationSection("Shadow Banned").getKeys(false).contains(offender.getUniqueId().toString())) {
             e.setCancelled(true);
-            p.sendMessage(String.format(e.getFormat(), p.getDisplayName(), e.getMessage()));
+            offender.sendMessage(String.format(e.getFormat(), offender.getDisplayName(), e.getMessage()));
             Bukkit.getConsoleSender().sendMessage(ChatColor.BLUE + "*ShadowBanned*"
-                    + ChatColor.RESET + String.format(e.getFormat(), p.getDisplayName(), e.getMessage()));
+                    + ChatColor.RESET + String.format(e.getFormat(), offender.getDisplayName(), e.getMessage()));
 
-            for (Player pp : Bukkit.getOnlinePlayers()) {
-                List<String> spies = ShadowBan.getInstance().getBannedConfig().getStringList("Shadow Banned." + p.getUniqueId().toString() + ".Spied By");
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                List<String> spies = plugin.getBannedConfig().getStringList(Util.path("Spied By", offender.getUniqueId().toString()));
 
-                if (pp.hasPermission("shadowban.spy") && spies.contains(pp.getName())) {
-                    pp.sendMessage(ChatColor.BLUE + "*ShadowBanned*"
-                            + ChatColor.RESET + String.format(e.getFormat(), p.getDisplayName(), e.getMessage()));
+                if (onlinePlayer.hasPermission("shadowban.spy") && spies.contains(onlinePlayer.getName())) {
+                    onlinePlayer.sendMessage(ChatColor.BLUE + "*ShadowBanned*"
+                            + ChatColor.RESET + String.format(e.getFormat(), offender.getDisplayName(), e.getMessage()));
                 }
             }
         }

@@ -9,27 +9,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 
-/**
- * Created by Ali-PC on 7/9/2017.
- */
 public class ShadowBan extends JavaPlugin {
-
-    private static ShadowBan plugin;
 
     private File bannedFile;
     private FileConfiguration bannedConfig;
 
-    public static ShadowBan getInstance() {
-        return plugin;
-    }
-
     @Override
     public void onEnable() {
-        plugin = this;
         createFile();
 
-        new ShadowBanCommand();
-        new PlayerChatListener();
+        new ShadowBanCommand(this);
+        new PlayerChatListener(this);
     }
 
     private void createFile() {
