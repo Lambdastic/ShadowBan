@@ -40,6 +40,7 @@ public class ShadowBanCommand implements CommandExecutor {
 
             Player offender = null;
 
+            // /shadowban spy {player}
             if (args[0].equalsIgnoreCase("spy") && args.length == 2) {
                 if (!sender.hasPermission("shadowban.spy")) {
                     sender.sendMessage(Messages.NO_PERMISSION);
@@ -57,6 +58,8 @@ public class ShadowBanCommand implements CommandExecutor {
                 }
                 return true;
             }
+
+            // /shadowban check {player}
             if (args[0].equalsIgnoreCase("check") && args.length == 2) {
                 if (!sender.hasPermission("shadowban.check")) {
                     sender.sendMessage(Messages.NO_PERMISSION);
@@ -68,6 +71,12 @@ public class ShadowBanCommand implements CommandExecutor {
                 } else {
                     sender.sendMessage(Messages.NOT_ONLINE);
                 }
+                return true;
+            }
+
+            // /shadowban {player} [reason]
+            if (!sender.hasPermission("shadowban.shadowban")) {
+                sender.sendMessage(Messages.NO_PERMISSION);
                 return true;
             }
             if (Bukkit.getPlayer(args[0]) != null) {
@@ -84,10 +93,6 @@ public class ShadowBanCommand implements CommandExecutor {
                 }
                 shadowBan(sender, offender, reason.toString().trim());
             } else {
-                if (!sender.hasPermission("shadowban.shadowban")) {
-                    sender.sendMessage(Messages.NO_PERMISSION);
-                    return true;
-                }
                 sender.sendMessage(Messages.NOT_ONLINE);
             }
         }
@@ -108,10 +113,6 @@ public class ShadowBanCommand implements CommandExecutor {
     }
 
     private void shadowBan(CommandSender sender, Player offender, String reason) {
-        if (!sender.hasPermission("shadowban.shadowban")) {
-            sender.sendMessage(Messages.NO_PERMISSION);
-            return;
-        }
         if (plugin.getBannedConfig().getConfigurationSection("Shadow Banned").getKeys(false).contains(offender.getUniqueId().toString())) {
             sender.sendMessage(ChatColor.GREEN + "Shadow ban removed from "
                     + ChatColor.BLUE + offender.getName() + ChatColor.GREEN + ".");
@@ -141,7 +142,6 @@ public class ShadowBanCommand implements CommandExecutor {
 
     private void checkPlayerBanStatus(CommandSender sender, Player offender) {
         FileConfiguration config = plugin.getBannedConfig();
-
         if (config.getConfigurationSection("Shadow Banned").getKeys(false).contains(offender.getUniqueId().toString())) {
             String reason = config.getString(Util.path("Reason", offender.getUniqueId().toString()));
             String date = config.getString(Util.path("Date", offender.getUniqueId().toString()));
@@ -168,10 +168,8 @@ public class ShadowBanCommand implements CommandExecutor {
 
     private void spyPlayer(Player sender, Player offender) {
         FileConfiguration config = plugin.getBannedConfig();
-
         if (config.getConfigurationSection("Shadow Banned").getKeys(false).contains(offender.getUniqueId().toString())) {
             List<String> spies = config.getStringList(Util.path("Spied By", offender.getUniqueId().toString()));
-
             if (spies.contains(sender.getName())) {
                 spies.remove(sender.getName());
                 sender.sendMessage(ChatColor.BLUE + " You have disabled spy on "
