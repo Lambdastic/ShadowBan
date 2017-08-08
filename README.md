@@ -14,3 +14,4 @@ This is a replica of Reddit's Shadow Ban feature in Minecraft using the Spigot A
 > shadowban.spy - Required to spy on a player who is shadow banned.  
 > shadowban.help - Required to see all commands in game.  
 
+If shadow banned messages are not identical to regular messages (formatting error), please let me know, and I will see how to fix it.
