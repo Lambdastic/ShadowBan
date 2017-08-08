@@ -18,8 +18,8 @@ public class ShadowBan extends JavaPlugin {
     public void onEnable() {
         createFile();
 
-        new ShadowBanCommand(this);
-        new PlayerChatListener(this);
+        getCommand("shadowban").setExecutor(new ShadowBanCommand(this));
+        getServer().getPluginManager().registerEvents(new PlayerChatListener(this), this);
     }
 
     private void createFile() {
@@ -46,7 +46,6 @@ public class ShadowBan extends JavaPlugin {
     public File getBannedFile() {
         return bannedFile;
     }
-
     public FileConfiguration getBannedConfig() {
         return bannedConfig;
     }

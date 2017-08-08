@@ -23,78 +23,78 @@ public class ShadowBanCommand implements CommandExecutor {
 
     public ShadowBanCommand(ShadowBan plugin) {
         this.plugin = plugin;
-        plugin.getCommand("shadowban").setExecutor(this);
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("shadowban")) {
-            if (args.length == 0) {
-                if (!sender.hasPermission("shadowban.help")) {
-                    sender.sendMessage(Messages.NO_PERMISSION);
-                    return true;
-                }
-                displayHelpMenu(sender);
-                return true;
-            }
-
-            Player offender = null;
-
-            // /shadowban spy {player}
-            if (args[0].equalsIgnoreCase("spy") && args.length == 2) {
-                if (!sender.hasPermission("shadowban.spy")) {
-                    sender.sendMessage(Messages.NO_PERMISSION);
-                    return true;
-                }
-                if (!(sender instanceof Player)) {
-                    sender.sendMessage(Messages.PLAYER_ONLY);
-                    return true;
-                }
-                if (Bukkit.getPlayer(args[1]) != null) {
-                    offender = Bukkit.getPlayer(args[1]);
-                    spyPlayer((Player) sender, offender);
-                } else {
-                    sender.sendMessage(Messages.NOT_ONLINE);
-                }
-                return true;
-            }
-
-            // /shadowban check {player}
-            if (args[0].equalsIgnoreCase("check") && args.length == 2) {
-                if (!sender.hasPermission("shadowban.check")) {
-                    sender.sendMessage(Messages.NO_PERMISSION);
-                    return true;
-                }
-                if (Bukkit.getPlayer(args[1]) != null) {
-                    offender = Bukkit.getPlayer(args[1]);
-                    checkPlayerBanStatus(sender, offender);
-                } else {
-                    sender.sendMessage(Messages.NOT_ONLINE);
-                }
-                return true;
-            }
-
-            // /shadowban {player} [reason]
-            if (!sender.hasPermission("shadowban.shadowban")) {
+        if (!cmd.getName().equalsIgnoreCase("shadowban")) {
+            return true;
+        }
+        if (args.length == 0) {
+            if (!sender.hasPermission("shadowban.help")) {
                 sender.sendMessage(Messages.NO_PERMISSION);
                 return true;
             }
-            if (Bukkit.getPlayer(args[0]) != null) {
-                offender = Bukkit.getPlayer(args[0]);
+            displayHelpMenu(sender);
+            return true;
+        }
 
-                if (args.length == 1) {
-                    shadowBan(sender, offender, "N/A");
-                    return true;
-                }
-                StringBuilder reason = new StringBuilder();
+        Player offender = null;
 
-                for (int i = 1; i < args.length; i++) {
-                    reason.append(args[i]).append(" ");
-                }
-                shadowBan(sender, offender, reason.toString().trim());
+        // /shadowban spy {player}
+        if (args[0].equalsIgnoreCase("spy") && args.length == 2) {
+            if (!sender.hasPermission("shadowban.spy")) {
+                sender.sendMessage(Messages.NO_PERMISSION);
+                return true;
+            }
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(Messages.PLAYER_ONLY);
+                return true;
+            }
+            if (Bukkit.getPlayer(args[1]) != null) {
+                offender = Bukkit.getPlayer(args[1]);
+                spyPlayer((Player) sender, offender);
             } else {
                 sender.sendMessage(Messages.NOT_ONLINE);
             }
+            return true;
+        }
+
+        // /shadowban check {player}
+        if (args[0].equalsIgnoreCase("check") && args.length == 2) {
+            if (!sender.hasPermission("shadowban.check")) {
+                sender.sendMessage(Messages.NO_PERMISSION);
+                return true;
+            }
+            if (Bukkit.getPlayer(args[1]) != null) {
+                offender = Bukkit.getPlayer(args[1]);
+                checkPlayerBanStatus(sender, offender);
+            } else {
+                sender.sendMessage(Messages.NOT_ONLINE);
+            }
+            return true;
+        }
+
+        // /shadowban {player} [reason]
+        if (!sender.hasPermission("shadowban.shadowban")) {
+            sender.sendMessage(Messages.NO_PERMISSION);
+            return true;
+        }
+        if (Bukkit.getPlayer(args[0]) != null) {
+            offender = Bukkit.getPlayer(args[0]);
+
+            if (args.length == 1) {
+                shadowBan(sender, offender, "N/A");
+                return true;
+            }
+            StringBuilder reason = new StringBuilder();
+
+            for (int i = 1; i < args.length; i++) {
+                reason.append(args[i]).append(" ");
+            }
+            shadowBan(sender, offender, reason.toString().trim());
+        } else {
+            sender.sendMessage(Messages.NOT_ONLINE);
         }
         return true;
     }
@@ -103,19 +103,27 @@ public class ShadowBanCommand implements CommandExecutor {
         sender.sendMessage(ChatColor.BLUE + "ShadowBan Commands\n");
 
         sender.sendMessage(ChatColor.AQUA + " /shadowban {player}"
-                + ChatColor.WHITE + " - Shadow ban or remove ban from player based on current status.");
+                + ChatColor.WHITE
+                + " - Shadow ban or remove ban from player based on current status.");
         sender.sendMessage(ChatColor.AQUA + " /shadowban {player} [reason]"
-                + ChatColor.WHITE + " - Shadow ban a player for a specific reason.");
+                + ChatColor.WHITE
+                + " - Shadow ban a player for a specific reason.");
         sender.sendMessage(ChatColor.AQUA + " /shadowban check {player}"
-                + ChatColor.WHITE + " - Check whether the player is shadow banned and the reason.");
+                + ChatColor.WHITE
+                + " - Check whether the player is shadow banned and the reason.");
         sender.sendMessage(ChatColor.AQUA + " /shadowban spy {player}"
-                + ChatColor.WHITE + " - Receive messages from a shadow banned player.");
+                + ChatColor.WHITE
+                + " - Receive messages from a shadow banned player.");
     }
 
     private void shadowBan(CommandSender sender, Player offender, String reason) {
-        if (plugin.getBannedConfig().getConfigurationSection("Shadow Banned").getKeys(false).contains(offender.getUniqueId().toString())) {
+        if (plugin.getBannedConfig().getConfigurationSection("Shadow Banned")
+                .getKeys(false)
+                .contains(offender.getUniqueId().toString())) {
             sender.sendMessage(ChatColor.GREEN + "Shadow ban removed from "
                     + ChatColor.BLUE + offender.getName() + ChatColor.GREEN + ".");
+
+            //removes the configuration section of that shadow banned player
             plugin.getBannedConfig().set("Shadow Banned." + offender.getUniqueId().toString(), null);
             try {
                 plugin.getBannedConfig().save(plugin.getBannedFile());
@@ -125,13 +133,16 @@ public class ShadowBanCommand implements CommandExecutor {
             return;
         }
         sender.sendMessage(ChatColor.GREEN + "You have shadow banned "
-                + ChatColor.BLUE + offender.getName() + ChatColor.GREEN + " for: " + ChatColor.WHITE + reason);
+                + ChatColor.BLUE + offender.getName() + ChatColor.GREEN
+                + " for: " + ChatColor.WHITE + reason);
 
-        plugin.getBannedConfig().set(Util.path("Name", offender.getUniqueId().toString()), offender.getName());
+        plugin.getBannedConfig().set
+                (Util.path("Name", offender.getUniqueId().toString()), offender.getName());
         plugin.getBannedConfig().set(Util.path("Reason", offender.getUniqueId().toString()), reason);
         plugin.getBannedConfig().set(Util.path("Date", offender.getUniqueId().toString()),
                 new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date()));
-        plugin.getBannedConfig().set(Util.path("Spied By", offender.getUniqueId().toString()), new ArrayList<String>());
+        plugin.getBannedConfig().set
+                (Util.path("Spied By", offender.getUniqueId().toString()), new ArrayList<String>());
 
         try {
             plugin.getBannedConfig().save(plugin.getBannedFile());
@@ -142,20 +153,24 @@ public class ShadowBanCommand implements CommandExecutor {
 
     private void checkPlayerBanStatus(CommandSender sender, Player offender) {
         FileConfiguration config = plugin.getBannedConfig();
-        if (config.getConfigurationSection("Shadow Banned").getKeys(false).contains(offender.getUniqueId().toString())) {
+
+        if (config.getConfigurationSection("Shadow Banned")
+                .getKeys(false)
+                .contains(offender.getUniqueId().toString())) {
             String reason = config.getString(Util.path("Reason", offender.getUniqueId().toString()));
             String date = config.getString(Util.path("Date", offender.getUniqueId().toString()));
 
             sender.sendMessage(ChatColor.YELLOW + offender.getName() + "\n");
-
             sender.sendMessage(ChatColor.AQUA + "Shadow Banned: " + ChatColor.DARK_RED + "true");
             sender.sendMessage(ChatColor.AQUA + "Reason: " + ChatColor.WHITE + reason);
             sender.sendMessage(ChatColor.AQUA + "Date: " + ChatColor.WHITE + date);
 
             StringBuilder spiedBy = new StringBuilder("[");
+            List<String> spies = config.getStringList
+                    (Util.path("Spied By", offender.getUniqueId().toString()));
 
-            for (int i = 0; i < config.getStringList(Util.path("Spied By", offender.getUniqueId().toString())).size(); i++) {
-                spiedBy.append(config.getStringList(Util.path("Spied By", offender.getUniqueId().toString())).get(i)).append(" ");
+            for (int i = 0; i < spies.size(); i++) {
+                spiedBy.append(spies.get(i)).append(" ");
             }
             spiedBy.toString().trim();
             spiedBy.append("]");
@@ -168,8 +183,12 @@ public class ShadowBanCommand implements CommandExecutor {
 
     private void spyPlayer(Player sender, Player offender) {
         FileConfiguration config = plugin.getBannedConfig();
-        if (config.getConfigurationSection("Shadow Banned").getKeys(false).contains(offender.getUniqueId().toString())) {
-            List<String> spies = config.getStringList(Util.path("Spied By", offender.getUniqueId().toString()));
+
+        if (config.getConfigurationSection("Shadow Banned")
+                .getKeys(false)
+                .contains(offender.getUniqueId().toString())) {
+            List<String> spies = config.getStringList
+                    (Util.path("Spied By", offender.getUniqueId().toString()));
             if (spies.contains(sender.getName())) {
                 spies.remove(sender.getName());
                 sender.sendMessage(ChatColor.BLUE + " You have disabled spy on "
@@ -180,7 +199,8 @@ public class ShadowBanCommand implements CommandExecutor {
                         + ChatColor.GREEN + offender.getName() + ChatColor.BLUE + ".");
             }
 
-            plugin.getBannedConfig().set(Util.path("Spied By", offender.getUniqueId().toString()), spies);
+            plugin.getBannedConfig().set
+                    (Util.path("Spied By", offender.getUniqueId().toString()), spies);
 
             try {
                 plugin.getBannedConfig().save(plugin.getBannedFile());
@@ -188,7 +208,9 @@ public class ShadowBanCommand implements CommandExecutor {
                 ex.printStackTrace();
             }
         } else {
-            sender.sendMessage(ChatColor.BLUE + offender.getName() + " is not shadow banned for you to spy on.");
+            sender.sendMessage(ChatColor.BLUE
+                    + offender.getName()
+                    + " is not shadow banned for you to spy on.");
         }
     }
 }

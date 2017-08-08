@@ -17,25 +17,32 @@ public class PlayerChatListener implements Listener {
 
     public PlayerChatListener(ShadowBan plugin) {
         this.plugin = plugin;
-        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onPlayerChat(AsyncPlayerChatEvent e) {
         Player offender = e.getPlayer();
 
-        if (plugin.getBannedConfig().getConfigurationSection("Shadow Banned").getKeys(false).contains(offender.getUniqueId().toString())) {
+        if (plugin.getBannedConfig().getConfigurationSection("Shadow Banned")
+                .getKeys(false)
+                .contains(offender.getUniqueId().toString())) {
             e.setCancelled(true);
-            offender.sendMessage(String.format(e.getFormat(), offender.getDisplayName(), e.getMessage()));
-            Bukkit.getConsoleSender().sendMessage(ChatColor.BLUE + "*ShadowBanned*"
-                    + ChatColor.RESET + String.format(e.getFormat(), offender.getDisplayName(), e.getMessage()));
+            offender.sendMessage(String.format
+                    (e.getFormat(), offender.getDisplayName(), e.getMessage()));
+
+            String messageToAdmins = ChatColor.BLUE + "*ShadowBanned*"
+                    + ChatColor.RESET
+                    + String.format(e.getFormat(), offender.getDisplayName(), e.getMessage());
+
+            Bukkit.getConsoleSender().sendMessage(messageToAdmins);
 
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                List<String> spies = plugin.getBannedConfig().getStringList(Util.path("Spied By", offender.getUniqueId().toString()));
+                List<String> spies = plugin.getBannedConfig().getStringList
+                        (Util.path("Spied By", offender.getUniqueId().toString()));
 
-                if (onlinePlayer.hasPermission("shadowban.spy") && spies.contains(onlinePlayer.getName())) {
-                    onlinePlayer.sendMessage(ChatColor.BLUE + "*ShadowBanned*"
-                            + ChatColor.RESET + String.format(e.getFormat(), offender.getDisplayName(), e.getMessage()));
+                if (onlinePlayer.hasPermission("shadowban.spy")
+                        && spies.contains(onlinePlayer.getName())) {
+                    onlinePlayer.sendMessage(messageToAdmins);
                 }
             }
         }
