@@ -1,0 +1,10 @@
+name: ${name}
+version: ${version}
+description: ${description}
+author: ${author}
+website: ${url}
+commands:
+  shadowban:
+    aliases: [sb]
+
+main: ${mainClass}
